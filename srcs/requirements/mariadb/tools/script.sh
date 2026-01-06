@@ -34,4 +34,4 @@ else
 fi
 
 # Lanzar mariadb en primer plano.
-exec mysql_safe
+exec mysqld_safe
