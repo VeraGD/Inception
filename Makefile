@@ -1,5 +1,5 @@
 DATA_PATH = /home/veragarc/data
-DOCKER_COMPOSE = docker compose -f srcs/docker-compose.yml
+DOCKER_COMPOSE = docker-compose -f srcs/docker-compose.yml
 
 GREEN = \033[0;32m
 RED = \033[0;31m
