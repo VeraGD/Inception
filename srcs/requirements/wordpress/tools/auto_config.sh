@@ -47,6 +47,10 @@ else
 	echo "WordPress already instaled. Skiping configuration"
 fi
 
+chown -R www-data:www-data /var/www/html
+
+chmod -R 755 /var/www/html
+
 # arrancar PHP-FPM en primer plano. -F asegura que se quede en primer plano y no se apague
 echo "Initiating PHP-FP..."
 exec /usr/sbin/php-fpm8.2 -F
