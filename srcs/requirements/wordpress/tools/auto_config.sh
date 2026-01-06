@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# carpeta dnde vamos a instalar wordpress
+cd /var/www/html
+
+# esperamos a mariadb, intentamos conectar hasta que esta responda
+echo "Waiting MariaDB..."
+while ! mariadb -h mariadb -u$SQL_USER -p$SQL_PASSWORD $SQL_DATABASE &>/dev/null; do
+	sleep 3
+done
+echo "MariaDB connected and ready."
+
+# comprobar si wordpress esta instalado para no machacarlo
+if [ ! -f ./wp-config.php ]; then
+	echo "Instaling WordPress..."
+
+	# Descargar archivos del núcleo de Wordpress
+	wp core download --allow-root
+
+	# Crea al archivo de configuracion wp-config.php con los datos de la DB
+	wp config create \
+		--dbname=$SQL_DATABASE \
+		--dbuser=$SQL_USER \
+		--dbpass=$SQL_PASSWORD \
+		--dbhost=mariadb:3306 \
+		--allow-root
+
+	# Instalar wordpress y crear usuario administrador
+	wp core install \
+		--url=$DOMAIN_NAME \
+		--title=$SITE_TITLE \
+		--admin_user=$ADMIN_USER \
+		--admin_password=$ADMIN_PASSWORD \
+		--admin_email=$ADMIN_EMAIL \
+		--allow-root
+
+	# Crear al segundo usuario
+	wp user create \
+		$USER1_LOGIN \
+		$USER1_EMAIL \
+		--user_pass=$USER1_PASS \
+		--role=author \
+		--allow-root
+
+	echo "WordPress instaled correctly"
+else
+	echo "WordPress already instaled. Skiping configuration"
+fi
+
+# arrancar PHP-FPM en primer plano. -F asegura que se quede en primer plano y no se apague
+echo "Initiating PHP-FP..."
+exec /usr/sbin/php-fpm8.2 -F
