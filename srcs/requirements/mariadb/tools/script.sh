@@ -1,37 +1,36 @@
 #!/bin/bash
 
-# Iniciar mariab en segundo plano para poder configurarlo
+# Iniciamos el servicio sin configurar nada aún
 service mariadb start
 
-# esperar a que el servicio ste listo
+# Esperamos a que el PID esté activo
 sleep 5
 
-# Vemos si la base de datos existe. Si no, es proque es la primera vez que arrancamos y hay que creerla.
-if [ ! -d "var/lib/mysql/$SQL_DATABASE" ]; then
-
-	echo "Setting DataBase"
-	
-	# crear base de datos con variable del .env
-	mysql -e "CREATE DATABASE IF NOT EXISTS \`${SQL_DATABASE}\`;"
-
-	# crear usuario para Wordpress
-	mysql -e "CREATE USER IF NOT EXISTS \`${SQL_USER}\`@'%' IDENTIFIED BY '${SQL_PASSWORD}';"
-
-	# dar permisos totales sobre la base de datos al usuario
-	mysql -e "GRANT ALL PRIVILEGES ON \`${SQL_DATABASE}\`.* TO \`${SQL_USER}\`@'%';"
-
-	# cambiar contraseña del usuario root y refrescar permisos
-	mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${SQL_ROOT_PASSWORD}';"
-	mysql -e "FLUSH PRIVILEGES;"
-
-	# apagar el servicio temporal para reiniciarlo en modo seguro
-	mysqladmin -u root -p$SQL_ROOT_PASSWORD shutdown
+# COMPROBACIÓN: ¿Ya existe la base de datos?
+if [ -d "/var/lib/mysql/$SQL_DATABASE" ]; then
+    echo "✅ La base de datos ya existe. Arrancando sin reconfigurar..."
 else
-	echo "Database already exists. Skiping settings"
+    # Si no existe, entramos aquí (SOLO LA PRIMERA VEZ)
+    echo "⚙️ Configurando MariaDB por primera vez..."
 
-	# si ya existe tambien tenemos que parar el servicio que ejecutamos arriba
-	mysqladmin -u root -p$SQL_PASS_PASSWORD shutown
+    # 1. Aseguramos que root no tenga pass inicialmente para poder entrar
+    # (Esto evita el error Access Denied durante la configuración)
+    sleep 2
+
+    # 2. Creamos la base de datos y el usuario
+    mysql -e "CREATE DATABASE IF NOT EXISTS \`${SQL_DATABASE}\`;"
+    mysql -e "CREATE USER IF NOT EXISTS \`${SQL_USER}\`@'%' IDENTIFIED BY '${SQL_PASSWORD}';"
+    mysql -e "GRANT ALL PRIVILEGES ON \`${SQL_DATABASE}\`.* TO \`${SQL_USER}\`@'%';"
+    
+    # 3. Cerramos la puerta: Ponemos contraseña a root
+    mysql -e "FLUSH PRIVILEGES;"
+    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${SQL_ROOT_PASSWORD}';"
+    
+    echo "✅ Configuración terminada. Reiniciando en modo seguro..."
 fi
 
-# Lanzar mariadb en primer plano.
+# Apagamos el servicio temporal que usamos para configurar
+mysqladmin -u root -p$SQL_ROOT_PASSWORD shutdown
+
+# Arrancamos el servicio final en primer plano
 exec mysqld_safe

@@ -26,4 +26,4 @@ RUN chown -R www-data:www-data /var/www/html
 EXPOSE 443
 
 # Arrancar en primer plano, daemon off -> evita que se vata al fondo y Docker piense que se ha cerrado
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/bin/bash", "-c", "sleep 10; nginx -g 'daemon off;'"]
