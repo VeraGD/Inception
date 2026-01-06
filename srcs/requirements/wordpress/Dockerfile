@@ -2,7 +2,7 @@ FROM debian:bookworm
 
 # Inatalar PHP-FPM, el conector de MySQL y herramientas de descarga
 # Usamos php8.2 versión por defecto en Debian 12
-RUN apt-get update && apt-get upgrade -y && apt-get install-y \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
 	wget \
 	php8.2 \
 	ph8.2-fpm \
