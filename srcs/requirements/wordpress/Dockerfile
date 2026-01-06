@@ -5,7 +5,7 @@ FROM debian:bookworm
 RUN apt-get update && apt-get upgrade -y && apt-get install -y \
 	wget \
 	php8.2 \
-	ph8.2-fpm \
+	php8.2-fpm \
 	php8.2-mysql \
 	mariadb-client \
 	&& rm -rf /var/lib/apt/lists/*
@@ -25,7 +25,7 @@ RUN mkdir -p /run/php && chown www-data:www-data /run/php
 WORKDIR /var/www/html
 
 # Copiar el arhivo que configurara al arancar
-COPY tools/auto-config.sh /usr/local/bin/auto_config.sh
+COPY tools/auto_config.sh /usr/local/bin/auto_config.sh
 RUN chmod +x /usr/local/bin/auto_config.sh
 
 # Puerto para hablar con Nginx

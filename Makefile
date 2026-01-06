@@ -7,7 +7,7 @@ RESET = \033[0m
 
 
 # Regla principal: crear carpetas y levantar el proyecto
-all:
+all: host
 	@echo "$(GREEN)Creating directorios of volumes...$(RESET)"
 	@mkdir -p $(DATA_PATH)/mariadb
 	@mkdir -p $(DATA_PATH)/wordpress
@@ -42,5 +42,9 @@ fclean: clean
 	@echo "$(GREEN)Deep cleaning finish.$(RESET)"
 
 re: fclean all
+
+host:
+	@echo "$(GREEN)Setting local domain in /etc/hosts...$(RESET)"
+	@grep -q "veragarc.42.fr" /etc/hosts || echo "127.0.0.1 veragarc.42.fr" | sudo tee -a /etc/hosts
 
 .PHONY: all stop start down clean fclean re

@@ -2,7 +2,7 @@ FROM debian:bookworm
 
 # Instalar ngnix y openssl -> obligtorio certficado TLS/SSL
 RUN apt-get update && apt-get install -y \
-	ngnix \
+	nginx \
 	openssl \
 	&& rm -rf /var/lib/apt/lists/*
 
@@ -21,7 +21,7 @@ RUN mkdir -p /var/run/nginx
 
 #Asignar permisos al usuario www-data
 RUN chmod 755 /var/www/html
-RUN chown -R www-data:www_data /var/www/html
+RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 443
 
