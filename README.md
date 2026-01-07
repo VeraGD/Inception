@@ -97,7 +97,27 @@ The infrastructure consists of three main services interacting via a dedicated D
 
 - **Initialization**: A script checks if the database exists; if not, it initializes the schema, creates the user/password securely, and secures the root account.
 
-### File Structure
+### 4. Core Concepts & Decisions
+
+During the development, several architectural decisions were made based on Docker best practices:
+
+* **Virtual Machines vs Docker**
+    * **VM:** Virtualizes the hardware. Each VM runs a full Operating System kernel (Heavy, slow boot).
+    * **Docker:** Virtualizes the OS. Containers share the host's Linux kernel but maintain isolated user spaces (Lightweight, instant boot). In this project, we run Docker *inside* a VM to simulate a production server environment.
+
+* **Secrets vs Environment Variables**
+    * **Env Vars:** Configuration settings stored in plain text or loaded from files.
+    * **Secrets:** Secure storage for sensitive data. This ensures credentials are not hardcoded in the codebase, preventing security leaks if the code is pushed to a repository.
+
+* **Docker Network vs Host Network**
+    * **Host Network:** The container shares the IP and ports of the host machine (No isolation).
+    * **Docker Network:** We use a **Custom Bridge Network**. This isolates the containers from the outside world. They can communicate internally using their container names as DNS hostnames (e.g., NGINX talks to `wordpress:9000`), but only the ports we explicitly expose (443) are accessible from the host.
+
+* **Docker Volumes vs Bind Mounts**
+    * **Docker Volumes:** Managed strictly by Docker (stored in `/var/lib/docker/volumes/`). Harder to access manually.
+    * **Bind Mounts:** Map a specific file or directory on the host machine to the container. We use **Bind Mounts** (pointing to `/home/veragarc/data/`) to ensure data persistence. This allows us to easily inspect backups and ensures data survives even if Docker is completely reset.
+
+### 5. File Structure
 
 ```text
 Inception/
@@ -305,7 +325,7 @@ To execute commands inside a running container (e.g., to check files in WordPres
 docker exec -it wordpress /bin/bash
 ```
 
-## 4. Data Storage and Persistence**
+## 4. Data Storage and Persistence
 Data persistence is handled via **Docker Volumes** mapped to the host machine. This ensures data survives container restarts.
 
 **Storage Location**
