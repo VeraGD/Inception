@@ -1,17 +1,171 @@
 # Inception
 This proyect has been created as part of the 42 curriculum by veragarc.
 
-## Description
-- section that clearly presents the project, including its goal and a brief overview.
+![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
+![NGINX](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
+![WordPress](https://img.shields.io/badge/WordPress-%23117AC9.svg?style=for-the-badge&logo=WordPress&logoColor=white)
+![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=mariadb&logoColor=white)
 
-## Instructions
-- section containing any relevant information about compilation, installation, and/or execution.
+---
 
-## Project description
-- Virtual Machines vs Docker
-- Secrets vs Environment Variables
-- Docker Network vs Host Network
-- Docker Volumes vs Bind Mounts
+## 📝 Description
 
-## Resources
-- section listing classic references related to the topic (documentation, articles, tutorials, etc.), as well as a description of how AI was used — specifying for which tasks and which parts of the project.
+This project aims to broaden the knowledge of system administration by using **Docker**. It requires setting up a small infrastructure composed of different services following specific rules for performance, security, and modularity.
+
+The goal is to build a complete web infrastructure using **Docker Compose**, running on a Virtual Machine, where each service runs in a separate container but communicates within a secure internal network.
+
+---
+
+## 📋 Instructions
+
+Follow these steps to deploy the infrastructure:
+
+### 1. Prerequisites
+* Docker Engine & Docker Compose installed.
+* Make.
+* Root privileges (required for `/etc/hosts` configuration).
+
+### 2. Environment Setup
+Ensure you have a `.env` file inside `srcs/` containing your secrets.
+**Example `.env`:**
+```env
+DOMAIN_NAME=veragarc.42.fr
+SQL_DATABASE=wordpress
+SQL_USER=veragarc
+SQL_PASSWORD=secret_password
+SQL_ROOT_PASSWORD=secret_root_password
+WP_ADMIN_USER=veragarc
+WP_ADMIN_PASS=admin_password
+```
+
+### 3. Local Domain Configuration
+Map the domain to your local machine using the Makefile helper:
+```Bash
+make host
+```
+
+This command adds `127.0.0.1 veragarc.42.fr` to your `/etc/hosts` file.
+
+### 4. Build and Run
+Execute the following command to build images and start the containers:
+```Bash
+make
+```
+
+### 5. Access
+Open your browser and visit:👉 **https://www.google.com/search?q=https://veragarc.42.fr**
+
+**Makefile Commands**
+
+| Command | Description |
+| :--- | :--- |
+| `make` | Builds images and starts the infrastructure (detached mode). |
+| `make build` | Builds the images without starting the containers. |
+| `make down` | Stops and removes containers and networks. |
+| `make clean` | Removes containers and Docker images. |
+| `make fclean` | **Deep Clean**: Removes containers, images, and **persistent data volumes** (Database & WP files). |
+| `make re` | Rebuilds everything from scratch (`fclean` + `make`). |
+| `make host` | Configures the local domain in `/etc/hosts` (requires sudo). |
+
+---
+
+## 🏗️ Project Description
+The infrastructure consists of three main services interacting via a dedicated Docker network.
+
+### 1. NGINX (Entry Point)
+- **Role:** Web Server & Reverse Proxy.
+
+- **Ports:** Exposes only port 443 (HTTPS).
+
+- **Security**: Uses TLS v1.2/v1.3 with self-signed certificates.
+
+- **Configuration**: Proxies PHP requests to the WordPress container and serves static content.
+
+### 2. WordPress + PHP-FPM
+- **Role**: Content Management System (CMS).
+
+- **Port**: 9000 (Internal access only).
+
+- **Automation**: Installs and configures itself automatically using a custom shell script (creates admin user, installs theme, etc.).
+
+- **Storag**: Shares the /var/www/html volume with NGINX.
+
+### 3. MariaDB
+- **Role**: Database Management System.
+
+- **Port**: 3306 (Internal access only).
+
+- **Initialization**: A script checks if the database exists; if not, it initializes the schema, creates the user/password securely, and secures the root account.
+
+### File Structure
+
+```text
+Inception/
+├── Makefile
+├── README.md
+└── srcs/
+    ├── .env
+    ├── docker-compose.yml
+    └── requirements/
+        ├── mariadb/
+        │   ├── Dockerfile
+        │   ├── conf/
+        │   └── tools/
+        ├── nginx/
+        │   ├── Dockerfile
+        │   ├── conf/
+        │   └── ssl/
+        └── wordpress/
+            ├── Dockerfile
+            ├── conf/
+            └── tools/
+```
+
+---
+
+## 📚 Resources
+
+Here is a list of the official documentation and tools used to build and understand this project:
+
+### Official Documentation
+* [Docker Engine Documentation](https://docs.docker.com/) - Core concepts of containers and images.
+* [Docker Compose File V3 Reference](https://docs.docker.com/compose/compose-file/) - Syntax for `docker-compose.yml`.
+* [NGINX Documentation](https://nginx.org/en/docs/) - Configuration directives and reverse proxy setup.
+* [MariaDB Knowledge Base](https://mariadb.com/kb/en/documentation/) - SQL commands and server configuration.
+* [WordPress.org](https://wordpress.org/support/) - CLI commands and installation requirements.
+
+### Tools & References
+* [Alpine Linux Wiki](https://wiki.alpinelinux.org/wiki/Main_Page) - Lightweight Linux distribution used for the containers.
+* [OpenSSL](https://www.openssl.org/) - Used for generating self-signed TLS certificates.
+* [GNU Make](https://www.gnu.org/software/make/manual/make.html) - Used for automating the build process.
+
+---
+
+## 🤖 IA (AI Usage)
+
+This project was developed with the assistance of Generative AI tools acting as a technical mentor. The AI was used to understand complex errors and optimize configuration logic, while the implementation and verification were done by the student.
+
+**Key areas where AI provided assistance:**
+
+**1. Debugging "Race Conditions"**:
+
+- Diagnosed Connection Refused errors between NGINX and WordPress.
+
+- Solution: Implemented sleep timers and connection checks in entrypoint scripts to ensure services start in the correct order.
+
+**2. Permission Management (Fixing 403/502 Errors)**:
+
+- Helped identify the conflict between the installation user (root) and the execution user (www-data).
+
+- Provided the logic for the chown -R www-data:www-data command within the WordPress start script to fix persistent permission issues.
+
+**3. Script Idempotency**:
+
+- Refined the MariaDB initialization script to prevent "Access Denied" errors on container restarts by adding checks to verify if the database directory already exists.
+
+**4. Syntax Verification**:
+
+- Assisted in detecting typo errors in configuration files (e.g., nginx.conf) that caused container crashes.
+
+**5.  Documentation & Manuals:**
+- Assisted in structuring and drafting the **README.md** file and project guides to ensure professional formatting, clear instructions, and correct Markdown syntax.
