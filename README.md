@@ -33,10 +33,7 @@ Ensure you have a `.env` file inside `srcs/` containing your secrets.
 DOMAIN_NAME=veragarc.42.fr
 SQL_DATABASE=wordpress
 SQL_USER=veragarc
-SQL_PASSWORD=secret_password
-SQL_ROOT_PASSWORD=secret_root_password
 WP_ADMIN_USER=veragarc
-WP_ADMIN_PASS=admin_password
 ```
 
 ### 3. Local Domain Configuration
@@ -61,7 +58,7 @@ Open your browser and visit:👉 **https://www.google.com/search?q=https://verag
 | Command | Description |
 | :--- | :--- |
 | `make` | Builds images and starts the infrastructure (detached mode). |
-| `make build` | Builds the images without starting the containers. |
+| `make up` | Builds the images without starting the containers. |
 | `make down` | Stops and removes containers and networks. |
 | `make clean` | Removes containers and Docker images. |
 | `make fclean` | **Deep Clean**: Removes containers, images, and **persistent data volumes** (Database & WP files). |
