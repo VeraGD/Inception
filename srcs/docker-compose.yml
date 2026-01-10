@@ -49,14 +49,14 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/veragarc/data/mariadb
+      device: ${DATA_PATH}/mariadb
 
   wordpress_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/veragarc/data/wordpress
+      device: ${DATA_PATH}/wordpress
 
 networks:
   inception:

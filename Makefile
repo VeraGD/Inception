@@ -1,50 +1,53 @@
-DATA_PATH = /home/veragarc/data
+# Detección automática del usuario y ruta
+LOGIN       = $(shell whoami)
+DATA_PATH   = /home/$(LOGIN)/data
 DOCKER_COMPOSE = docker-compose -f srcs/docker-compose.yml
 
+# Colores
 GREEN = \033[0;32m
-RED = \033[0;31m
+RED   = \033[0;31m
 RESET = \033[0m
 
+# Regla principal
+all: host up
 
-# Regla principal: crear carpetas y levantar el proyecto
-all: host
-	@echo "$(GREEN)Creating directorios of volumes...$(RESET)"
+# Levanta el proyecto (Crea carpetas + Build + Up)
+up:
+	@echo "$(GREEN)Creating directories for volumes at $(DATA_PATH)...$(RESET)"
 	@mkdir -p $(DATA_PATH)/mariadb
 	@mkdir -p $(DATA_PATH)/wordpress
-	@echo "$(GREEN)Building and initilization dockers...$(RESET)"
-	@$(DOCKER_COMPOSE) up --build -d
+	@echo "$(GREEN)Building and initializing dockers...$(RESET)"
+	@# Pasamos la variable DATA_PATH al comando para que la lea el docker-compose.yml
+	DATA_PATH=$(DATA_PATH) $(DOCKER_COMPOSE) up --build -d
 
-# Detener dockers sin borrarlos
-stop:
-	@echo "$(RED)Stoping dockers...$(RESET)"
-	@$(DOCKER_COMPOSE) stop
-
-# Arranca dockers ya creados
+# Arranca contenedores que ya existían pero estaban parados
 start:
-	@echo "$(GREEN)Initiating dockers...$(RESET)"
+	@echo "$(GREEN)Starting dockers...$(RESET)"
 	@$(DOCKER_COMPOSE) start
 
-# Detiene y borra contenedores y redes
+# Tumba la infraestructura
 down:
 	@echo "$(RED)Taking down infrastructure...$(RESET)"
-	@$(DOCKER_COMPOSE) down
+	@DATA_PATH=$(DATA_PATH) $(DOCKER_COMPOSE) down
 
-# Limpieza suave: borra contenedores e imagenes
+# Limpieza de contenedores e imágenes
 clean: down
-	@echo "$(RED)Eliminating images ang volumes of docker...$(RESET)"
+	@echo "$(RED)Eliminating images and docker volumes...$(RESET)"
 	@docker system prune -a --volumes -f
 
-# Limpieza total, borra tambien los datos del disco duro. Borra para siempre tu base de datos y tu web para siempre.
+# Limpieza total (Borra también los datos del disco)
 fclean: clean
-	@echo "$(RED)Eliminating persistant data in $(DATA_PATH)...$(RESET)"
-	@sudo rm -rf $(DATA_PATH)/mariadb/*
-	@sudo rm -rf $(DATA_PATH)/wordpress/*
-	@echo "$(GREEN)Deep cleaning finish.$(RESET)"
+	@echo "$(RED)Eliminating persistent data in $(DATA_PATH)...$(RESET)"
+	@# Usamos sudo porque los archivos creados por Docker suelen pertenecer a root
+	@sudo rm -rf $(DATA_PATH)
+	@echo "$(GREEN)Deep cleaning finished.$(RESET)"
 
+# Reconstrucción total
 re: fclean all
 
+# Configuración del dominio local
 host:
 	@echo "$(GREEN)Setting local domain in /etc/hosts...$(RESET)"
 	@grep -q "veragarc.42.fr" /etc/hosts || echo "127.0.0.1 veragarc.42.fr" | sudo tee -a /etc/hosts
 
-.PHONY: all stop start down clean fclean re
+.PHONY: all up start down clean fclean re host
