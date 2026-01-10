@@ -4,24 +4,19 @@ SQL_PASSWORD=$(cat /run/secrets/db_password)
 ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_password)
 USER1_PASS=$(cat /run/secrets/wp_user_password)
 
-# carpeta dnde vamos a instalar wordpress
 cd /var/www/html
 
-# esperamos a mariadb, intentamos conectar hasta que esta responda
 echo "Waiting MariaDB..."
 while ! mariadb -h mariadb -u$SQL_USER -p$SQL_PASSWORD $SQL_DATABASE &>/dev/null; do
 	sleep 3
 done
 echo "MariaDB connected and ready."
 
-# comprobar si wordpress esta instalado para no machacarlo
 if [ ! -f ./wp-config.php ]; then
 	echo "Instaling WordPress..."
 
-	# Descargar archivos del núcleo de Wordpress
 	wp core download --allow-root
 
-	# Crea al archivo de configuracion wp-config.php con los datos de la DB
 	wp config create \
 		--dbname=$SQL_DATABASE \
 		--dbuser=$SQL_USER \
@@ -29,7 +24,6 @@ if [ ! -f ./wp-config.php ]; then
 		--dbhost=mariadb:3306 \
 		--allow-root
 
-	# Instalar wordpress y crear usuario administrador
 	wp core install \
 		--url=$DOMAIN_NAME \
 		--title=$SITE_TITLE \
@@ -38,7 +32,6 @@ if [ ! -f ./wp-config.php ]; then
 		--admin_email=$ADMIN_EMAIL \
 		--allow-root
 
-	# Crear al segundo usuario
 	wp user create \
 		$USER1_LOGIN \
 		$USER1_EMAIL \
@@ -55,6 +48,5 @@ chown -R www-data:www-data /var/www/html
 
 chmod -R 755 /var/www/html
 
-# arrancar PHP-FPM en primer plano. -F asegura que se quede en primer plano y no se apague
 echo "Initiating PHP-FP..."
 exec /usr/sbin/php-fpm8.2 -F

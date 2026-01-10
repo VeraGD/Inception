@@ -1,16 +1,12 @@
 [mysqld]
 
-; Usuario de sistema que ejecutara la base de datos
 
 user = mysql
 
 port = 3306
 
-; directorio del volumen
 datadir = /var/lib/mysql
 
-; ruta del socket
 socket = /var/run/mysqld/mysqld.sock
 
-; permitir conexiones desde cualquier ip, por defecto seria 127.0.0.1 bloquearia Wordpress
 bind-address = 0.0.0.0 
