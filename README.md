@@ -60,7 +60,7 @@ Open your browser and visit:👉 **https://www.google.com/search?q=https://verag
 | Command | Description |
 | :--- | :--- |
 | `make` | Builds images and starts the infrastructure (detached mode). |
-| `make build` | Builds the images without starting the containers. |
+| `make up` | Builds the images without starting the containers. |
 | `make down` | Stops and removes containers and networks. |
 | `make clean` | Removes containers and Docker images. |
 | `make fclean` | **Deep Clean**: Removes containers, images, and **persistent data volumes** (Database & WP files). |
@@ -240,7 +240,7 @@ To manage the WordPress content:
 
 ## 4. Credentials Management
 
-usernames are not hardcoded in the scripts. They are stored safely in a hidden file named `.env` inside the `srcs/` folder.
+Usernames are not hardcoded in the scripts. They are stored safely in a hidden file named `.env` inside the `srcs/` folder.
 
 To view or change credentials, edit the `.env` file:
 
@@ -249,8 +249,6 @@ To view or change credentials, edit the `.env` file:
 | `WP_ADMIN_USER` | Username for the WordPress Admin Panel. |
 | `WP_ADMIN_PASS` | Password for the WordPress Admin Panel. |
 | `SQL_USER` | Internal Database username. |
-| `SQL_PASSWORD` | Internal Database password. |
-| `SQL_ROOT_PASSWORD` | Root password for MariaDB (System Admin only). |
 
 ## 5. Checking Service Status
 
@@ -286,12 +284,9 @@ The project relies on a `.env` file located at `srcs/.env` to inject environment
 **Required `.env` structure:**
 ```env
 DOMAIN_NAME=veragarc.42.fr
-SQL_DATABASE=wordpress
+SQL_DATABASE=mariadb
 SQL_USER=veragarc
-SQL_PASSWORD=secret
-SQL_ROOT_PASSWORD=secretroot
 WP_ADMIN_USER=veragarc
-WP_ADMIN_PASS=adminpass
 ```
 
 **Host Configuration**
