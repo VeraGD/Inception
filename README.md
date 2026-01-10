@@ -32,10 +32,7 @@ Ensure you have a `.env` file inside `srcs/` containing your secrets.
 DOMAIN_NAME=veragarc.42.fr
 SQL_DATABASE=wordpress
 SQL_USER=veragarc
-SQL_PASSWORD=secret_password
-SQL_ROOT_PASSWORD=secret_root_password
 WP_ADMIN_USER=veragarc
-WP_ADMIN_PASS=admin_password
 ```
 
 ### 3. Local Domain Configuration
