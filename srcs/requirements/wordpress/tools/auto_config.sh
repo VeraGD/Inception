@@ -1,5 +1,9 @@
 #!/bin/bash
 
+SQL_PASSWORD=$(cat /run/secrets/db_password)
+ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_password)
+USER1_PASS=$(cat /run/secrets/wp_user_password)
+
 # carpeta dnde vamos a instalar wordpress
 cd /var/www/html
 

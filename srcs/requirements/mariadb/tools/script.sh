@@ -1,5 +1,8 @@
 #!/bin/bash
 
+SQL_PASSWORD=$(cat /run/secrets/db_password)
+SQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
+
 # Iniciamos el servicio sin configurar nada aún
 service mariadb start
 
